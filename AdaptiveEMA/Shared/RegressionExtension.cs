@@ -7,15 +7,15 @@ internal static class RegressionExtension
 {
     internal static double GetRSquared(this double[] y, int polyOrder)
     {
-        if (y.Any())
+        if (!y.Any())
             throw new ArgumentException("Argument must have values", nameof(y));
 
-        if (polyOrder >= y.Length)
+        if (polyOrder + 1 >= y.Length)
             return 1;
 
         var x = new double[y.Length];
         for (var i = 0; i != x.Length; i++)
-            x[i] = i++;
+            x[i] = i;
 
         var ls = new PolynomialLeastSquares()
         {

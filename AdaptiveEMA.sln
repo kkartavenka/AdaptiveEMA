@@ -3,7 +3,11 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.5.33414.496
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AdaptiveEMA", "AdaptiveEMA\AdaptiveEMA.csproj", "{504CD69A-2D70-4BC3-9DE2-5687149E1AA0}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AdaptiveEMA", "AdaptiveEMA\AdaptiveEMA.csproj", "{504CD69A-2D70-4BC3-9DE2-5687149E1AA0}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Demo", "Demo", "{50D6B919-96F1-4AD2-9241-CFE152EE1995}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RSquaredAdaptiveEma.Demo", "RSquaredAdaptiveEma.Demo\RSquaredAdaptiveEma.Demo.csproj", "{CD89E0B1-B06E-4BC6-9E27-CADAB723332D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,9 +19,16 @@ Global
 		{504CD69A-2D70-4BC3-9DE2-5687149E1AA0}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{504CD69A-2D70-4BC3-9DE2-5687149E1AA0}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{504CD69A-2D70-4BC3-9DE2-5687149E1AA0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CD89E0B1-B06E-4BC6-9E27-CADAB723332D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CD89E0B1-B06E-4BC6-9E27-CADAB723332D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CD89E0B1-B06E-4BC6-9E27-CADAB723332D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CD89E0B1-B06E-4BC6-9E27-CADAB723332D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{CD89E0B1-B06E-4BC6-9E27-CADAB723332D} = {50D6B919-96F1-4AD2-9241-CFE152EE1995}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {804CE988-D2FA-4840-9477-815EBC853A0E}

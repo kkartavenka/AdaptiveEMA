@@ -11,12 +11,9 @@ public class RSquaredAdaptiveEma
     private const int DEFAULT_LOWER_POLY_ORDER = 1;
     private const int DEFAULT_HIGHER_POLY_ORDER = 2;
 
-    private double _rsquaredMin, _rsquaredMax;
     private readonly int _windowSize = -1;
     private int _lowerPolyOrder, _higherPolyOrder;
 
-    private double _scaleMin, _scaleMax;
-    private bool _isFinalScale = false;
     private readonly double _smoothingFactorMin, _smoothingFactorMax;
 
     private WeightsProvider _weightProvider;
@@ -38,11 +35,10 @@ public class RSquaredAdaptiveEma
     private void Initialize()
     {
         _weightProvider = new(_windowSize);
-        (_rsquaredMin, _rsquaredMax) = (0, 1 - _smoothingFactorMin);
         (_lowerPolyOrder, _higherPolyOrder) = (DEFAULT_LOWER_POLY_ORDER, DEFAULT_HIGHER_POLY_ORDER);
     }
 
-    public double GetLastValue(double[] sequence, bool simpleEma = false)
+    public double GetLastValue(double[] sequence)
     {
         var selectedRange = sequence;
         if (_windowSize != -1)
@@ -55,19 +51,10 @@ public class RSquaredAdaptiveEma
                 selectedRange = selectedRange[(selectedRange.Length - _windowSize)..];
             }
 
-        var rsquaredAdjustment = 0d;
+        var rsquaredAdjustment = RSquaredAdjustment(sequence: selectedRange)
+            .ScaleTo(0, 1, _smoothingFactorMin, _smoothingFactorMax);
 
-        if (!simpleEma)
-            rsquaredAdjustment = RSquaredAdjustment(sequence: selectedRange);
-
-        var currentSmoothingFactor = _smoothingFactorMin + rsquaredAdjustment;
-        if (currentSmoothingFactor > _smoothingFactorMax)
-            currentSmoothingFactor = _smoothingFactorMax;
-
-        if (_isFinalScale && !simpleEma)
-            currentSmoothingFactor = currentSmoothingFactor.ScaleTo(_smoothingFactorMin, _smoothingFactorMax, _scaleMin, _scaleMax);
-
-        var weights = _weightProvider.GetDecayWeights(currentSmoothingFactor);
+        var weights = _weightProvider.GetDecayWeights(rsquaredAdjustment);
         var weightedMean = Measures.WeightedMean(selectedRange, weights);
         return weightedMean;
     }
@@ -93,26 +80,9 @@ public class RSquaredAdaptiveEma
         var rsquaredQuadratic = sequence.GetRSquared(polyOrder: _higherPolyOrder);
 
         var rsquaredDistance = rsquaredQuadratic - rsquaredLinear;
-
-        return rsquaredDistance.ScaleTo(observedMinX: 0, observedMaxX: 1, expectedMinX: _rsquaredMin, expectedMaxX: _rsquaredMax);
+        return rsquaredDistance;
     }
 
-    public void SetRSquaredAdjustmentBoundaries(double min, double max) => (_rsquaredMin, _rsquaredMax) = (min, max);
     public void SetLowerPolyOrder(int value) => _lowerPolyOrder = value;
     public void SetHigherPolyOrder(int value) => _higherPolyOrder = value;
-    public void SetScalingSmoothingFactorRange(double min, double max)
-    {
-        if (min < 0 || min > 1)
-            throw new ArgumentOutOfRangeException(nameof(min));
-
-        if (max < 0 || max > 1)
-            throw new ArgumentOutOfRangeException(nameof(max));
-
-        if (min >= max)
-            throw new Exception($"{nameof(max)} shoud be more than {nameof(min)}");
-
-        (_scaleMin, _scaleMax) = (min, max);
-        _isFinalScale = true;
-    }
-
 }
