@@ -8,11 +8,10 @@ public class RSquaredAdaptiveEma
     private const double DEFAULT_SMOOTHING_FACTOR_MIN = 0;
     private const double DEFAULT_SMOOTHING_FACTOR_MAX = 1;
 
-    private const int DEFAULT_LOWER_POLY_ORDER = 1;
-    private const int DEFAULT_HIGHER_POLY_ORDER = 2;
+    private const int DEFAULT_POLY_ORDER = 2;
 
     private readonly int _windowSize = -1;
-    private int _lowerPolyOrder, _higherPolyOrder;
+    private int _lowerPolyOrder, _polyOrder;
 
     private readonly double _smoothingFactorMin, _smoothingFactorMax;
 
@@ -26,7 +25,7 @@ public class RSquaredAdaptiveEma
 
     public RSquaredAdaptiveEma(double smoothingFactorMin, double smoothingFactorMax, int windowSize)
     {
-        (_smoothingFactorMax, _smoothingFactorMin) = (smoothingFactorMin, smoothingFactorMax);
+        (_smoothingFactorMin, _smoothingFactorMax) = (smoothingFactorMin, smoothingFactorMax);
         ValidateSmoothingFactor(smoothingFactorMin, smoothingFactorMax);
         _windowSize = windowSize;
         Initialize();
@@ -35,7 +34,7 @@ public class RSquaredAdaptiveEma
     private void Initialize()
     {
         _weightProvider = new(_windowSize);
-        (_lowerPolyOrder, _higherPolyOrder) = (DEFAULT_LOWER_POLY_ORDER, DEFAULT_HIGHER_POLY_ORDER);
+        _polyOrder = DEFAULT_POLY_ORDER;
     }
 
     public double GetLastValue(double[] sequence)
@@ -73,16 +72,17 @@ public class RSquaredAdaptiveEma
 
     private double RSquaredAdjustment(double[] sequence)
     {
-        if (sequence.Length < _higherPolyOrder + 2)
+        if (sequence.Length < _polyOrder + 2)
             return 0;
 
-        var rsquaredLinear = sequence.GetRSquared(polyOrder: _lowerPolyOrder);
-        var rsquaredQuadratic = sequence.GetRSquared(polyOrder: _higherPolyOrder);
-
-        var rsquaredDistance = rsquaredQuadratic - rsquaredLinear;
-        return rsquaredDistance;
+        return sequence.GetRSquared(polyOrder: _polyOrder);
     }
 
-    public void SetLowerPolyOrder(int value) => _lowerPolyOrder = value;
-    public void SetHigherPolyOrder(int value) => _higherPolyOrder = value;
+    public void SetPolyOrder(int value)
+    {
+        if (value < 1)
+            throw new ArgumentOutOfRangeException(nameof(value), "The value should be greater then 0");
+
+        _polyOrder = value;
+    }
 }
