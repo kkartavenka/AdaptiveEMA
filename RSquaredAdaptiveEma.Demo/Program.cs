@@ -1,8 +1,8 @@
-﻿using CsvHelper;
+﻿using Accord.IO;
+using CsvHelper;
 using RSquaredAdaptiveEma.Demo;
 using System.Globalization;
 using XPlot.Plotly;
-using AdaptiveEMA;
 
 var file = @"./../../../../Data/AMD Historical Data.csv";
 
@@ -12,33 +12,46 @@ using var csvReader = new CsvReader(sr, CultureInfo.InvariantCulture);
 csvReader.Read();
 
 int id = 0; 
-var data = new List<DataModel>();
+var dataRaw = new List<DataModel>();
 
 while (csvReader.Read())
-    data.Add(new(id: id++, csvReader.GetField<double>(1)));
+    dataRaw.Add(new(id: id++, csvReader.GetField<double>(1)));
 
-var filter = new AdaptiveEMA.RSquaredAdaptiveEma(0, 0.5, 20);
-for(int i =0;i<data.Count;i++)
+var filter20 = new AdaptiveEMA.RSquaredAdaptiveEma(0, 0.5, 20);
+var filter50 = new AdaptiveEMA.RSquaredAdaptiveEma(0, 0.5, 50);
+
+var data20 = dataRaw.Clone();
+var data50 = dataRaw.Clone();
+for (int i = 0; i < dataRaw.Count; i++)
 {
-    var selected = data.Take(i + 1).Select(m => m.Raw).ToArray();
-    data[i].Transformed = filter.GetLastValue(selected);
+    var selected = dataRaw.Take(i + 1).Select(m => m.Raw).ToArray();
+    data20[i].Transformed = filter20.GetLastValue(selected);
+    data50[i].Transformed = filter50.GetLastValue(selected);
 }
 
-var traces = new List<Scattergl>();
-traces.Add(new Scattergl()
+var traces = new List<Scattergl>
 {
-    x = data.Select(m => (double)m.Id).ToArray(),
-    y = data.Select(m => m.Raw).ToArray(),
-    name = "Raw",
-    mode = "lines+markers"
-});
-
-traces.Add(new Scattergl()
-{
-    x = data.Select(m => (double)m.Id).ToArray(),
-    y = data.Select(m => m.Transformed).ToArray(),
-    name = "Transformed",
-    mode = "lines+markers"
-});
+    new Scattergl()
+    {
+        x = dataRaw.Select(m => (double)m.Id).ToArray(),
+        y = dataRaw.Select(m => m.Raw).ToArray(),
+        name = "Raw",
+        mode = "lines+markers"
+    },
+    new Scattergl()
+    {
+        x = data20.Select(m => (double)m.Id).ToArray(),
+        y = data20.Select(m => m.Transformed).ToArray(),
+        name = "Transformed [0, 0.5, 20]",
+        mode = "lines+markers"
+    },
+    new Scattergl()
+    {
+        x = data50.Select(m => (double)m.Id).ToArray(),
+        y = data50.Select(m => m.Transformed).ToArray(),
+        name = "Transformed [0, 0.5, 50]",
+        mode = "lines+markers"
+    }
+};
 
 Chart.Plot(traces).Show();
