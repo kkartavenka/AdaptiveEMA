@@ -27,4 +27,4 @@ var weightedValue = filter.GetLastValue(someArray);
 
 ## License
 
-FastDtw.CSharp is licensed under the [MIT license](https://github.com/kkartavenka/FastDtw.CSharp/blob/master/LICENSE.txt).
+AdaptiveEMA is licensed under the [MIT license](https://github.com/kkartavenka/FastDtw.CSharp/blob/master/LICENSE.txt).
