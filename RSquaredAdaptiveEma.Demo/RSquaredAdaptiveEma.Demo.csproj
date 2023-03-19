@@ -8,6 +8,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Accord.Statistics" Version="3.8.0" />
     <PackageReference Include="CsvHelper" Version="30.0.1" />
     <PackageReference Include="XPlot.Plotly" Version="4.0.6" />
   </ItemGroup>
