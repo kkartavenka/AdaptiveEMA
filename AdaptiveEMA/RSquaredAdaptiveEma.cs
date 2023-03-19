@@ -11,7 +11,11 @@ public class RSquaredAdaptiveEma
     private const int DEFAULT_POLY_ORDER = 2;
 
     private readonly int _windowSize = -1;
-    private int _lowerPolyOrder, _polyOrder;
+    private int _polyOrder;
+
+    private int _confirmationWindow;
+    private double _significanceRatio = 2;
+    private bool _useConfirmationWindow;
 
     private readonly double _smoothingFactorMin, _smoothingFactorMax;
 
@@ -44,7 +48,8 @@ public class RSquaredAdaptiveEma
             if (_windowSize > selectedRange.Length)
             {
                 _weightProvider.UpdateWindowSize(selectedRange.Length);
-            } else if (_weightProvider.GetWindowSize() < selectedRange.Length)
+            }
+            else if (_weightProvider.GetWindowSize() < selectedRange.Length)
             {
                 _weightProvider.UpdateWindowSize(_windowSize);
                 selectedRange = selectedRange[(selectedRange.Length - _windowSize)..];
@@ -75,7 +80,18 @@ public class RSquaredAdaptiveEma
         if (sequence.Length < _polyOrder + 2)
             return 0;
 
-        return sequence.GetRSquared(polyOrder: _polyOrder);
+        var fullModelRSquared = sequence.GetRSquared(polyOrder: _polyOrder);
+        if (!_useConfirmationWindow || sequence.Length != _windowSize)
+            return fullModelRSquared;
+
+        if (sequence.Length < _polyOrder * 2 + 2)
+            return fullModelRSquared;
+
+        var confirmationWindowRSquared = sequence[(_confirmationWindow)..].GetRSquared(polyOrder: _polyOrder);
+        if (confirmationWindowRSquared / _significanceRatio < fullModelRSquared)
+            return fullModelRSquared;
+
+        return confirmationWindowRSquared;
     }
 
     public void SetPolyOrder(int value)
@@ -83,6 +99,21 @@ public class RSquaredAdaptiveEma
         if (value < 1)
             throw new ArgumentOutOfRangeException(nameof(value), "The value should be greater then 0");
 
+        if (_useConfirmationWindow && value + 2 > _confirmationWindow)
+            throw new Exception("Confirmation window size should more than polynomial order + 2");
+
         _polyOrder = value;
+    }
+
+    public void UseConfirmationWindowSize(int confirmationWindowSize, double significanceRatio = 2)
+    {
+        if (confirmationWindowSize >= _windowSize)
+            throw new Exception("Confirmation window size should less than WindowSize specified in the constructor");
+
+        if (confirmationWindowSize < _polyOrder + 2)
+            throw new Exception("Confirmation window size should more than polynomial order + 2");
+
+        (_confirmationWindow, _significanceRatio) = (confirmationWindowSize, significanceRatio);
+        _useConfirmationWindow = true;
     }
 }
