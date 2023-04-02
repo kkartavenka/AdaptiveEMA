@@ -5,9 +5,7 @@ namespace RSquaredAdaptiveEma.Demo;
 
 internal class DataReader
 {
-    private const int FIELD_ID = 1;
-
-    internal DataReader(string file)
+    internal DataReader(string file, int fieldId)
     {
         using var sr = new StreamReader(file);
         using var csvReader = new CsvReader(sr, CultureInfo.InvariantCulture);
@@ -18,7 +16,7 @@ internal class DataReader
         var dataRaw = new List<DataModel>();
 
         while (csvReader.Read())
-            dataRaw.Add(new(id: id++, csvReader.GetField<double>(FIELD_ID)));
+            dataRaw.Add(new(id: id++, csvReader.GetField<double>(fieldId)));
 
         Data = dataRaw;
     }
