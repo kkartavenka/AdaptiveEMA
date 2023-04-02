@@ -25,6 +25,10 @@ var weightedValue = filter.GetLastValue(someArray);
 
 ![image](https://user-images.githubusercontent.com/45607880/226188318-b3113160-726b-41c2-ad1c-f0d9d2a32904.png)
 
+![image](https://user-images.githubusercontent.com/45607880/229378652-2b3fb39b-e891-4d4f-b645-92ee95ce062e.png)
+
+
 ## License
 
 AdaptiveEMA is licensed under the [MIT license](https://github.com/kkartavenka/FastDtw.CSharp/blob/master/LICENSE.txt).
+
