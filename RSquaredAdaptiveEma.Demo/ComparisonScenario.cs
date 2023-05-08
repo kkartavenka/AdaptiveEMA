@@ -6,7 +6,7 @@ internal class ComparisonScenario : Result
     internal ComparisonScenario(List<DataModel> rawData) : base(rawData)
     {
         CaseNoConfirmation(20, 0, 0.5);
-        CaseWithConfirmation(20, 0, 0.5, 10, 2);
+        CaseWithConfirmation(100, 0, 0.5, 20, 2);
     }
 
     internal void CaseNoConfirmation (int windowSize, double smoothingFactorMin, double smoothingFactorMax)
