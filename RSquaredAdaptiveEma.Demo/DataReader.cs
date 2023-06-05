@@ -18,7 +18,9 @@ internal class DataReader
         while (csvReader.Read())
             dataRaw.Add(new(id: id++, csvReader.GetField<double>(fieldId)));
 
-        Data = dataRaw;
+        
+        
+        Data = dataRaw.OrderByDescending(m => m.Id).ToList();
     }
 
     internal List<DataModel> Data { get; }
