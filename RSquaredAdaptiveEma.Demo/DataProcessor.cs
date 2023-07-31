@@ -23,12 +23,12 @@ internal class DataProcessor
         }
         preExport.Insert(0, titles);
         File.WriteAllLines("amd.csv", preExport);
-        
+
         var traces = new List<Scattergl>
         {
             new Scattergl
             {
-                x = dataRaw.Select(m => (double)m.Id).ToArray(),
+                x = dataRaw[0].DateTime == null ? dataRaw.Select(m => m.Id).ToArray() : dataRaw.Select(m => m.DateTime).ToArray(),
                 y = dataRaw.Select(m => m.Raw).ToArray(),
                 name = "Raw",
                 mode = "lines+markers",
@@ -41,7 +41,7 @@ internal class DataProcessor
 
         results.ForEach(row => traces.Add(new Scattergl
         {
-            x = row.data.Select(m => (double)m.Id).ToArray(),
+            x = row.data[0].DateTime == null ? row.data.Select(m => m.Id).ToArray() : row.data.Select(m => m.DateTime).ToArray(),
             y = row.data.Select(m => m.Transformed).ToArray(),
             name = row.title,
             mode = "lines+markers",
@@ -51,6 +51,10 @@ internal class DataProcessor
             }
         }));
 
-        Chart.Plot(traces).Show();
+        var chart = Chart.Plot(traces);
+        chart.WithWidth(1920);
+        chart.WithHeight(900);
+
+        chart.Show();
     }
 }
