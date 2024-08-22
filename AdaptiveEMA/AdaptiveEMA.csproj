@@ -10,6 +10,8 @@
         <Description>An exponential moving average filter where the decay factor depends on the coefficient of determination of the fitted polynomial. This allows for a faster response to signal changes on the curves.</Description>
         <PackageProjectUrl>https://github.com/kkartavenka/AdaptiveEMA</PackageProjectUrl>
         <RepositoryUrl>https://github.com/kkartavenka/AdaptiveEMA</RepositoryUrl>
+        <PackageTags>signal-processing filter digital-signal-processing exponential-smoothing real-time-filter</PackageTags>
+        <Version>1.0.1</Version>
     </PropertyGroup>
 
     <ItemGroup>
