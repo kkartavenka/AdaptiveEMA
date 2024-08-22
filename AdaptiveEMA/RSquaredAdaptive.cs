@@ -1,60 +1,63 @@
-﻿using Accord.Statistics;
+﻿using System;
 using AdaptiveEMA.Shared;
 
-namespace AdaptiveEMA;
-
-public class RSquaredAdaptive
+namespace AdaptiveEMA
 {
-    private const int DEFAULT_POLY_ORDER = 2;
-
-    private readonly double _smoothingFactorMin, _smoothingFactorMax;
-    private readonly int _windowSize = -1;
-    private int _polyOrder;
-
-    private WeightsProvider _weightProvider;
-
-    public RSquaredAdaptive()
+    public class RSquaredAdaptive
     {
-        Initialize();
-    }
+        private readonly RunParameters _parameters;
+        private readonly WeightsProvider _weightsProvider;
+        private readonly double[] _x;
 
-    public RSquaredAdaptive(double smoothingFactorMin, double smoothingFactorMax, int windowSize)
-    {
-        (_smoothingFactorMin, _smoothingFactorMax) = (smoothingFactorMin, smoothingFactorMax);
-        _windowSize = windowSize;
-        Initialize();
-    }
-
-    private void Initialize()
-    {
-        _weightProvider = new(_windowSize);
-        _polyOrder = DEFAULT_POLY_ORDER;
-    }
-
-    public double GetLastValue(double[] sequence)
-    {
-        var selectedRange = sequence;
-        if (_windowSize != -1)
-            if (_windowSize > selectedRange.Length)
+        public RSquaredAdaptive(RunParameters parameters)
+        {
+            _parameters = parameters;
+            _weightsProvider = new WeightsProvider(parameters.WindowSize);
+            
+            _x = new double[parameters.WindowSize];
+            for (var i = 0; i < _x.Length; i++)
             {
-                _weightProvider.UpdateWindowSize(selectedRange.Length);
+                _x[i] = i;
             }
-            else if (_weightProvider.GetWindowSize() < selectedRange.Length)
+        }
+
+        public double Transform(double[] values)
+        {
+            if (values.Length == _parameters.WindowSize)
             {
-                _weightProvider.UpdateWindowSize(_windowSize);
-                selectedRange = selectedRange[(selectedRange.Length - _windowSize)..];
+                return GetLastValue(values);
+            }
+            
+            if (values.Length > _parameters.WindowSize)
+            {
+                var selectedArray = new double[_parameters.WindowSize];
+                Array.Copy(values, (values.Length - _parameters.WindowSize), selectedArray, 0, _parameters.WindowSize);
+                return GetLastValue(selectedArray);
             }
 
-        if (selectedRange.Length < _polyOrder + 2)
-            return selectedRange.Last();
+            // In case not sufficient data points, just return the last one
+            if (_parameters.SwallowValidation)
+            {
+                return values[values.Length - 1];
+            }
 
-        var unweightedRegression = selectedRange.GetRegression(_polyOrder);
-        var rsquared = selectedRange.GetRSquared(unweightedRegression)
-            .ScaleTo(0, 1, _smoothingFactorMin, _smoothingFactorMax);
+            throw new ArgumentOutOfRangeException(nameof(values), values.Length,
+                $"Should be larger than window size, windowSize: {_parameters.WindowSize}, array length: {values.Length}");
+        }
+        
+        private double GetLastValue(double[] values)
+        {
+            var decayCoef = GetDecayCoef(values);
+            var weights = _weightsProvider.GetDecayWeights(decayCoef);
+            return values.WeightedMean(weights);
+        }
 
-        var unweightedExpectation = unweightedRegression.Transform(selectedRange.Length - 1);
-        var emaExpectation = selectedRange.WeightedMean(_weightProvider.GetDecayWeights(rsquared));
-
-        return unweightedExpectation * (1 - rsquared) + emaExpectation * rsquared;
+        private double GetDecayCoef(double[] values)
+        {
+            var poly = PolynomialRegression.Get(_x, values, _parameters.PolyOrder);
+            var rSquared = poly.RSquared(_x, values);
+            
+            return rSquared.ScaleTo(0, 1, _parameters.MinScale, _parameters.MaxScale);
+        }
     }
 }

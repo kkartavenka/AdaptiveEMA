@@ -1,52 +1,67 @@
-﻿namespace AdaptiveEMA.Shared;
+﻿using System;
+using System.Linq;
 
-internal class WeightsProvider
+namespace AdaptiveEMA.Shared
 {
-    private int _windowSize;
-    internal WeightsProvider(int windowSize) => _windowSize = windowSize;
-
-    private double[]? GetSpecificCase(double decayFactor)
+    internal class WeightsProvider
     {
-        if (_windowSize == 1)
-            return new double[] { 1 };
+        private readonly int _windowSize;
 
-        if (decayFactor < 0)
-            decayFactor = 0;
-
-        if (decayFactor == 0)
-            return Enumerable.Range(1, _windowSize).Select(m => (double)1).ToArray();
-
-        if (decayFactor == 1)
+        internal WeightsProvider(int windowSize)
         {
-            var sequence = Enumerable.Range(1, _windowSize).Select(m => (double)0).ToArray();
-            sequence[^1] = 1;
-
-            return sequence;
+            _windowSize = windowSize;
         }
 
-        return null;
-    }
-
-    internal double[] GetDecayWeights(double alpha)
-    {
-        var specificCase = GetSpecificCase(alpha);
-        if (specificCase != null)
-            return specificCase;
-
-        double decay = 1 - alpha;
-        double[] decayWeights = new double[_windowSize];
-
-        double decayRow = 1;
-        for (int i = _windowSize - 1; i >= 0; i--)
+        private double[] GetSpecificCase(double decayFactor)
         {
-            decayWeights[i] = decayRow;
-            decayRow *= decay;
+            if (_windowSize == 1)
+            {
+                return new double[] { 1 };
+            }
+
+            if (decayFactor < 0)
+            {
+                decayFactor = 0;
+            }
+
+            switch (decayFactor)
+            {
+                case 0:
+                    return Enumerable.Range(1, _windowSize)
+                        .Select(m => (double)1)
+                        .ToArray();
+                case 1:
+                {
+                    var sequence = Enumerable.Range(1, _windowSize)
+                        .Select(m => (double)0)
+                        .ToArray();
+                    sequence[sequence.Length - 1] = 1;
+                    return sequence;
+                }
+                default:
+                    return null;
+            }
         }
 
-        return decayWeights;
+        internal double[] GetDecayWeights(double alpha)
+        {
+            var specificCase = GetSpecificCase(alpha);
+            if (specificCase != null)
+            {
+                return specificCase;
+            }
+
+            var decay = 1 - alpha;
+            var decayWeights = new double[_windowSize];
+
+            double decayRow = 1;
+            for (var i = _windowSize - 1; i >= 0; i--)
+            {
+                decayWeights[i] = decayRow;
+                decayRow *= decay;
+            }
+
+            return decayWeights;
+        }
     }
-
-    internal void UpdateWindowSize(int windowSize) => _windowSize = windowSize;
-
-    internal int GetWindowSize() => _windowSize;
 }

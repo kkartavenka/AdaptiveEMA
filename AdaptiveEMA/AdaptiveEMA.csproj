@@ -1,13 +1,19 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <TargetFramework>net6.0</TargetFramework>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <Nullable>enable</Nullable>
-  </PropertyGroup>
+    <PropertyGroup>
+        <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+        <TargetFrameworks>net6.0;net8.0;netstandard2.0</TargetFrameworks>
+        <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+        <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+        <Title>AdaptiveEMA</Title>
+        <Authors>Kostya Kartavenka</Authors>
+        <Description>An exponential moving average filter where the decay factor depends on the coefficient of determination of the fitted polynomial. This allows for a faster response to signal changes on the curves.</Description>
+        <PackageProjectUrl>https://github.com/kkartavenka/AdaptiveEMA</PackageProjectUrl>
+        <RepositoryUrl>https://github.com/kkartavenka/AdaptiveEMA</RepositoryUrl>
+    </PropertyGroup>
 
-<ItemGroup>
-    <PackageReference Include="Accord.Statistics" Version="3.8.0" />
-  </ItemGroup>
+    <ItemGroup>
+        <PackageReference Include="MathNet.Numerics" Version="5.0.0" />
+    </ItemGroup>
 
 </Project>
