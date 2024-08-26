@@ -15,7 +15,7 @@ var filterRunParameter = new RunParameters(10);
 2) Construct the filter, and use it
 
 ```csharp
-var filter = new RSquaredAdaptiveEma(filterRunParameter);
+var filter = new RSquaredAdaptive(filterRunParameter);
 
 var dataPoints = new double[] {1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
 var lastPointTransformed = filter.Transform(dataPoints);
